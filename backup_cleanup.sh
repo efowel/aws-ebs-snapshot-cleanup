@@ -32,13 +32,13 @@ backup() {
 	do
 		#get volume id for each element in instance[]
 		volumes=($(/bin/aws --region=$REGION  describe-instances --filters Name=tag:Name,Values=$v --query 'Reservations[*].Instances[*].BlockDeviceMappings[*].[DeviceName,Ebs.VolumeId'] --out text |grep -v ^/dev/sda |cut -f 2))
-        for snapshot in "${volumes[@]}"
-        do
-	        #create snapshot for each volume
-	        echo "Creating a snapshot for volume $snapshot..."
-	        /bin/aws --region=$REGION ec2 create-snapshot --volume-id $snapshot --description "Automated_Snapshot from volume $snapshot with Instance $v" --out talbe
-	        sleep 3s
-        done
+		for snapshot in "${volumes[@]}"
+		do
+			#create snapshot for each volume
+			echo "Creating a snapshot for volume $snapshot..."
+			/bin/aws --region=$REGION ec2 create-snapshot --volume-id $snapshot --description "Automated_Snapshot from volume $snapshot with Instance $v" --out talbe
+			sleep 3s
+		done
 	done
 }
 
@@ -49,16 +49,16 @@ special_backup() {
 		echo "No spaceial backup was configured"
 	else
 		echo "Creating a snapshot for configured instance..."
-        for i in "${!special[@]}"
-        do
-            name=$(echo "$i")
-            device=$(echo "${special[$i]}")
-            echo "instance: $name, devicemap: $device "
-            volume=$(/bin/aws --region=$REGION ec2 describe-instances --filters Name=tag:Name,Values=$name --query 'Reservations[*].Instances[*].BlockDeviceMappings[*].[DeviceName,Ebs.VolumeId'] --out text |grep $device |cut -f 2)
-            echo "Creating a snapshot for $i..."
-            /bin/aws --region=$REGION ec2 create-snapshot --volume-id $volume --description "Automated_Snapshot from volume $snapshot with Instance $device" --out table
-            sleep 3s
-        done
+		for i in "${!special[@]}"
+		do
+		    name=$(echo "$i")
+		    device=$(echo "${special[$i]}")
+		    echo "instance: $name, devicemap: $device "
+		    volume=$(/bin/aws --region=$REGION ec2 describe-instances --filters Name=tag:Name,Values=$name --query 'Reservations[*].Instances[*].BlockDeviceMappings[*].[DeviceName,Ebs.VolumeId'] --out text |grep $device |cut -f 2)
+		    echo "Creating a snapshot for $i..."
+		    /bin/aws --region=$REGION ec2 create-snapshot --volume-id $volume --description "Automated_Snapshot from volume $snapshot with Instance $device" --out table
+		    sleep 3s
+		done
     fi
 }
 
